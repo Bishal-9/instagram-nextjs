@@ -1,3 +1,7 @@
+import { useSession, signIn, signOut } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { useRecoilState } from 'recoil'
+import { modalState } from '../atoms/modalAtom'
 import Image from 'next/image'
 import {
     HeartIcon,
@@ -10,19 +14,30 @@ import {
 import { HomeIcon } from '@heroicons/react/solid'
 
 function Header() {
+
+    const { data: session } = useSession()
+    const [open, setOpen] = useRecoilState(modalState)
+    const router = useRouter()
+
     return (
         <div className='shadow-sm border-b bg-white sticky top-0 z-50'>
             <div className='flex justify-between bg-white max-w-6xl mx-5 xl:mx-auto'>
 
                 {/* Left */}
-                <div className='relative hidden lg:inline-grid w-24 cursor-pointer'>
+                <div 
+                    className='relative hidden lg:inline-grid w-24 cursor-pointer'
+                    onClick={() => router.push('/')}
+                >
                     <Image
                         src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1920px-Instagram_logo.svg.png'
                         layout='fill'
                         objectFit='contain'
                     />
                 </div>
-                <div className='relative w-10 lg:hidden flex-shrink-0 cursor-pointer'>
+                <div 
+                    className='relative w-10 lg:hidden flex-shrink-0 cursor-pointer'
+                    onClick={() => router.push('/')}
+                >
                     <Image
                         src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1280px-Instagram_logo_2016.svg.png'
                         layout='fill'
@@ -46,22 +61,31 @@ function Header() {
 
                 {/* Right */}
                 <div className="flex items-center justify-end space-x-4">
-                    <HomeIcon className='navBtn' />
+                    <HomeIcon className='navBtn' onClick={() => router.push('/')} />
                     <MenuIcon className='h-6 md:hidden cursor-pointer' />
 
-                    <div className="relative navBtn">
-                        <PaperAirplaneIcon className='navBtn rotate-45' />
-                        <div className="absolute -top-1 -right-2 text-xs w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-pulse text-white">3</div>
-                    </div>
-                    <PlusCircleIcon className='navBtn' />
-                    <UserGroupIcon className='navBtn' />
-                    <HeartIcon className='navBtn' />
+                    {
+                        session ? (
+                            <>
+                                <div className="relative navBtn">
+                                    <PaperAirplaneIcon className='navBtn rotate-45' />
+                                    <div className="absolute -top-1 -right-2 text-xs w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-pulse text-white">3</div>
+                                </div>
+                                <PlusCircleIcon onClick={() => setOpen(true)} className='navBtn' />
+                                <UserGroupIcon className='navBtn' />
+                                <HeartIcon className='navBtn' />
 
-                    <img
-                        src={'https://avatars.githubusercontent.com/u/63504511?s=400&u=63dba2e8e506fb4349189c8fb2db6074b9298646&v=4'}
-                        alt="profile picture"
-                        className='h-10 rounded-full cursor-pointer'
-                    />
+                                <img
+                                    src={session?.user?.image}
+                                    alt="profile picture"
+                                    className='h-10 w-10 rounded-full cursor-pointer'
+                                    onClick={signOut}
+                                />
+                            </>
+                        ) : (
+                            <button onClick={signIn}>Sign In</button>
+                        )
+                    }
                 </div>
             </div>
         </div>
